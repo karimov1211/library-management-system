@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Avtomatlashtirilgan Kutubxona Tizimi — Kitoblar, mualliflar va ijaralarni boshqarish">
+    <title>{% block title %}Kutubxona Tizimi{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- ===== NAVIGATSIYA ===== -->
+    <nav class="navbar" id="mainNavbar">
+        <div class="nav-brand">
+            <i class="fas fa-book-open"></i>
+            <span>Kutubxona</span>
+        </div>
+        <ul class="nav-links" id="navLinks">
+            <li>
+                <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Bosh sahifa</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('authors') }}" class="nav-link {% if request.endpoint == 'authors' %}active{% endif %}">
+                    <i class="fas fa-feather-alt"></i>
+                    <span>Mualliflar</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('books') }}" class="nav-link {% if request.endpoint in ['books', 'search_books'] %}active{% endif %}">
+                    <i class="fas fa-book"></i>
+                    <span>Kitoblar</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('borrowers') }}" class="nav-link {% if request.endpoint == 'borrowers' %}active{% endif %}">
+                    <i class="fas fa-users"></i>
+                    <span>Ijarachchilar</span>
+                </a>
+            </li>
+            <li>
+                <a href="{{ url_for('loans') }}" class="nav-link {% if request.endpoint == 'loans' %}active{% endif %}">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Ijaralar</span>
+                </a>
+            </li>
+        </ul>
+        <button class="nav-toggle" id="navToggle" aria-label="Menyu">
+            <i class="fas fa-bars"></i>
+        </button>
+    </nav>
+
+    <!-- ===== FLASH XABARLAR ===== -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-container" id="flashContainer">
+            {% for category, message in messages %}
+            <div class="flash-message flash-{{ category }}" onclick="this.remove()">
+                <i class="fas {% if category == 'success' %}fa-check-circle{% elif category == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
+                <span>{{ message }}</span>
+                <button class="flash-close"><i class="fas fa-times"></i></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- ===== ASOSIY KONTENT ===== -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2026 Avtomatlashtirilgan Kutubxona Tizimi</p>
+            <p class="footer-tech">Python · Flask · Azure SQL · OOP</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

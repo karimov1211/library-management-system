@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}Kitoblar — Kutubxona Tizimi{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1><i class="fas fa-book"></i> Kitoblar Boshqaruvi</h1>
+    <p>Kitoblarni qo'shish, qidirish va boshqarish</p>
+</section>
+
+<section class="search-section">
+    <form action="{{ url_for('search_books') }}" method="GET" class="search-form">
+        <div class="search-wrapper">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" name="q" value="{{ search|default('') }}"
+                   placeholder="Kitob nomi, ISBN yoki janr bo'yicha qidirish..."
+                   class="search-input" id="searchInput">
+            <button type="submit" class="btn btn-primary btn-search">Qidirish</button>
+        </div>
+    </form>
+</section>
+
+<section class="form-section">
+    <div class="card glass-card">
+        <div class="card-header" onclick="toggleForm('bookForm')">
+            <h2><i class="fas fa-plus-circle"></i> Yangi Kitob Qo'shish</h2>
+            <i class="fas fa-chevron-down toggle-icon" id="bookFormIcon"></i>
+        </div>
+        <div class="card-body collapsible" id="bookForm">
+            <form action="{{ url_for('add_book') }}" method="POST" class="data-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="title">Kitob nomi *</label>
+                        <input type="text" id="title" name="title" required placeholder="Kitob nomi" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="isbn">ISBN</label>
+                        <input type="text" id="isbn" name="isbn" placeholder="978-3-16-148410-0" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="year">Nashr yili</label>
+                        <input type="number" id="year" name="year" min="0" max="2026" placeholder="2024" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="genre">Janr</label>
+                        <select id="genre" name="genre" class="form-input">
+                            <option value="">Tanlang...</option>
+                            <option>Badiiy adabiyot</option><option>Ilmiy</option>
+                            <option>Tarixiy</option><option>Falsafa</option>
+                            <option>Texnologiya</option><option>Tibbiyot</option>
+                            <option>Huquq</option><option>Iqtisodiyot</option>
+                            <option>Pedagogika</option><option>Psixologiya</option>
+                            <option>Boshqa</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pages">Sahifalar</label>
+                        <input type="number" id="pages" name="pages" min="1" placeholder="350" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="author_id">Muallif</label>
+                        <select id="author_id" name="author_id" class="form-input">
+                            <option value="">Tanlang...</option>
+                            {% for author in authors %}
+                            <option value="{{ author.id }}">{{ author.full_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="quantity">Nusxalar</label>
+                        <input type="number" id="quantity" name="quantity" min="1" value="1" class="form-input">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Qo'shish</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<section class="table-section">
+    <div class="card glass-card">
+        <div class="card-header">
+            <h2><i class="fas fa-list"></i> Kitoblar ({{ books|length }})</h2>
+        </div>
+        <div class="card-body">
+            {% if books %}
+            <div class="table-responsive">
+                <table class="data-table" id="booksTable">
+                    <thead>
+                        <tr>
+                            <th>#</th><th>Nomi</th><th>ISBN</th><th>Yili</th>
+                            <th>Janr</th><th>Muallif</th><th>Nusxa</th><th>Holati</th><th>Amallar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for book in books %}
+                        <tr>
+                            <td>{{ book.id }}</td>
+                            <td class="td-title">{{ book.title }}</td>
+                            <td><code>{{ book.isbn or '—' }}</code></td>
+                            <td>{{ book.year or '—' }}</td>
+                            <td>{% if book.genre %}<span class="badge badge-genre">{{ book.genre }}</span>{% else %}—{% endif %}</td>
+                            <td>{{ book._author_name if book._author_name is defined else '—' }}</td>
+                            <td class="td-center">{{ book.quantity }}</td>
+                            <td>
+                                {% if book.available %}<span class="badge badge-success">Mavjud</span>
+                                {% else %}<span class="badge badge-danger">Ijarada</span>{% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('delete_book', book_id=book.id) }}" class="btn btn-danger btn-sm"
+                                   onclick="return confirm('O\'chirmoqchimisiz?')"><i class="fas fa-trash"></i></a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-book"></i>
+                <p>Hozircha kitoblar mavjud emas</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

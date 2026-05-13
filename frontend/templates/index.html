@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Bosh Sahifa — Kutubxona Tizimi{% endblock %}
+
+{% block content %}
+<section class="hero-section">
+    <div class="hero-content">
+        <h1 class="hero-title">
+            <i class="fas fa-landmark"></i>
+            Avtomatlashtirilgan Kutubxona Tizimi
+        </h1>
+        <p class="hero-subtitle">Kitoblar, mualliflar va ijaralarni zamonaviy tarzda boshqarish platformasi</p>
+    </div>
+</section>
+
+<!-- ===== STATISTIKA KARTOCHKALAR ===== -->
+<section class="stats-section">
+    <h2 class="section-title">
+        <i class="fas fa-chart-bar"></i> Umumiy Statistika
+    </h2>
+    <div class="stats-grid">
+        <div class="stat-card stat-books">
+            <div class="stat-icon">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-number" data-count="{{ stats.total_books }}">{{ stats.total_books }}</span>
+                <span class="stat-label">Jami Kitoblar</span>
+            </div>
+            <div class="stat-wave"></div>
+        </div>
+
+        <div class="stat-card stat-available">
+            <div class="stat-icon">
+                <i class="fas fa-book-open"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-number" data-count="{{ stats.available_books }}">{{ stats.available_books }}</span>
+                <span class="stat-label">Mavjud Kitoblar</span>
+            </div>
+            <div class="stat-wave"></div>
+        </div>
+
+        <div class="stat-card stat-authors">
+            <div class="stat-icon">
+                <i class="fas fa-feather-alt"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-number" data-count="{{ stats.total_authors }}">{{ stats.total_authors }}</span>
+                <span class="stat-label">Mualliflar</span>
+            </div>
+            <div class="stat-wave"></div>
+        </div>
+
+        <div class="stat-card stat-borrowers">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-number" data-count="{{ stats.total_borrowers }}">{{ stats.total_borrowers }}</span>
+                <span class="stat-label">Ijarachchilar</span>
+            </div>
+            <div class="stat-wave"></div>
+        </div>
+
+        <div class="stat-card stat-loans">
+            <div class="stat-icon">
+                <i class="fas fa-handshake"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-number" data-count="{{ stats.active_loans }}">{{ stats.active_loans }}</span>
+                <span class="stat-label">Faol Ijaralar</span>
+            </div>
+            <div class="stat-wave"></div>
+        </div>
+
+        <div class="stat-card stat-overdue">
+            <div class="stat-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-number" data-count="{{ stats.overdue_loans }}">{{ stats.overdue_loans }}</span>
+                <span class="stat-label">Muddati O'tgan</span>
+            </div>
+            <div class="stat-wave"></div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== TEZKOR HAVOLALAR ===== -->
+<section class="quick-actions-section">
+    <h2 class="section-title">
+        <i class="fas fa-bolt"></i> Tezkor Amallar
+    </h2>
+    <div class="actions-grid">
+        <a href="{{ url_for('books') }}" class="action-card">
+            <div class="action-icon"><i class="fas fa-plus-circle"></i></div>
+            <h3>Kitob Qo'shish</h3>
+            <p>Yangi kitobni kutubxonaga qo'shish</p>
+        </a>
+        <a href="{{ url_for('authors') }}" class="action-card">
+            <div class="action-icon"><i class="fas fa-user-plus"></i></div>
+            <h3>Muallif Qo'shish</h3>
+            <p>Yangi muallif ma'lumotlarini kiritish</p>
+        </a>
+        <a href="{{ url_for('loans') }}" class="action-card">
+            <div class="action-icon"><i class="fas fa-hand-holding"></i></div>
+            <h3>Kitob Berish</h3>
+            <p>Kitobni ijaraga berish</p>
+        </a>
+        <a href="{{ url_for('borrowers') }}" class="action-card">
+            <div class="action-icon"><i class="fas fa-id-card"></i></div>
+            <h3>Ijarachchi Ro'yxati</h3>
+            <p>Barcha ijarachchilarni ko'rish</p>
+        </a>
+    </div>
+</section>
+
+<!-- ===== TIZIM HAQIDA ===== -->
+<section class="about-section">
+    <h2 class="section-title">
+        <i class="fas fa-info-circle"></i> Tizim Haqida
+    </h2>
+    <div class="about-grid">
+        <div class="about-card">
+            <div class="about-icon"><i class="fas fa-code"></i></div>
+            <h3>OOP Yondashuv</h3>
+            <p>Barcha klasslar (Author, Book, Borrower, Loan) OOP tamoyillari asosida yaratilgan: encapsulation, property dekoratorlari, validatsiya.</p>
+        </div>
+        <div class="about-card">
+            <div class="about-icon"><i class="fas fa-database"></i></div>
+            <h3>Azure SQL</h3>
+            <p>Ma'lumotlar Azure SQL Server bulutli bazasida saqlanadi. Singleton pattern orqali ulanish boshqariladi.</p>
+        </div>
+        <div class="about-card">
+            <div class="about-icon"><i class="fas fa-flask"></i></div>
+            <h3>Flask Framework</h3>
+            <p>Web interfeys Flask framework asosida qurilgan. RESTful routelar va Jinja2 shablonlar ishlatilgan.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

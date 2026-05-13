@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Ijaralar — Kutubxona Tizimi{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <h1><i class="fas fa-exchange-alt"></i> Ijaralar Boshqaruvi</h1>
+    <p>Kitob ijara operatsiyalarini boshqarish</p>
+</section>
+
+<section class="form-section">
+    <div class="card glass-card">
+        <div class="card-header" onclick="toggleForm('loanForm')">
+            <h2><i class="fas fa-hand-holding"></i> Yangi Ijara Yaratish</h2>
+            <i class="fas fa-chevron-down toggle-icon" id="loanFormIcon"></i>
+        </div>
+        <div class="card-body collapsible" id="loanForm">
+            <form action="{{ url_for('add_loan') }}" method="POST" class="data-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="book_id">Kitob *</label>
+                        <select id="book_id" name="book_id" required class="form-input">
+                            <option value="">Kitob tanlang...</option>
+                            {% for book in books %}
+                            {% if book.available %}
+                            <option value="{{ book.id }}">{{ book.title }} ({{ book.quantity }} nusxa)</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="borrower_id">Ijarachchi *</label>
+                        <select id="borrower_id" name="borrower_id" required class="form-input">
+                            <option value="">Ijarachchi tanlang...</option>
+                            {% for b in borrowers %}
+                            <option value="{{ b.id }}">{{ b.full_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Ijara Yaratish</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<section class="table-section">
+    <div class="card glass-card">
+        <div class="card-header">
+            <h2><i class="fas fa-list"></i> Ijaralar ({{ loans|length }})</h2>
+        </div>
+        <div class="card-body">
+            {% if loans %}
+            <div class="table-responsive">
+                <table class="data-table" id="loansTable">
+                    <thead>
+                        <tr>
+                            <th>#</th><th>Kitob</th><th>Ijarachchi</th>
+                            <th>Sana</th><th>Muddat</th><th>Qaytarilgan</th><th>Holati</th><th>Amal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for loan in loans %}
+                        <tr>
+                            <td>{{ loan.id }}</td>
+                            <td>{{ loan._book_title if loan._book_title is defined else loan.book_id }}</td>
+                            <td>{{ loan._borrower_name if loan._borrower_name is defined else loan.borrower_id }}</td>
+                            <td>{{ loan.loan_date.strftime('%d.%m.%Y') if loan.loan_date else '—' }}</td>
+                            <td>{{ loan.due_date.strftime('%d.%m.%Y') if loan.due_date else '—' }}</td>
+                            <td>{{ loan.return_date.strftime('%d.%m.%Y') if loan.return_date else '—' }}</td>
+                            <td>
+                                {% if loan.status == 'active' %}
+                                <span class="badge badge-warning">Faol</span>
+                                {% elif loan.status == 'returned' %}
+                                <span class="badge badge-success">Qaytarilgan</span>
+                                {% elif loan.status == 'overdue' %}
+                                <span class="badge badge-danger">Muddati o'tgan</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if loan.status != 'returned' %}
+                                <a href="{{ url_for('return_loan', loan_id=loan.id) }}" class="btn btn-success btn-sm"
+                                   onclick="return confirm('Kitobni qaytarmoqchimisiz?')">
+                                    <i class="fas fa-undo"></i> Qaytarish
+                                </a>
+                                {% else %}
+                                <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-exchange-alt"></i>
+                <p>Hozircha ijaralar mavjud emas</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
