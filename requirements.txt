@@ -1,7 +1,7 @@
 fastapi
 uvicorn
 gunicorn
-pyodbc
+pymssql
 jinja2
 python-dotenv
 starlette
