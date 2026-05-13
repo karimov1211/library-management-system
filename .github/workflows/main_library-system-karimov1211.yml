@@ -49,10 +49,16 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_84523DD21F534B3E8FC51A6CACCC5A2F }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_DEE75CAEF33F41918C85B32AA8B1C23A }}
 
+      - name: Configure Azure App Settings via CLI
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            az webapp config appsettings set --resource-group librarygroup --name library-system-karimov1211 --settings AZURE_SQL_SERVER="library-server-karimov1211.database.windows.net" AZURE_SQL_DATABASE="LibraryDB" AZURE_SQL_USERNAME="dbadmin" AZURE_SQL_PASSWORD="AzurePassword123!" AZURE_SQL_DRIVER="{ODBC Driver 18 for SQL Server}" SECRET_KEY="kutubxona-tizimi-maxfiy-kalit-2026" SCM_DO_BUILD_DURING_DEPLOYMENT=true
+            az webapp config set --resource-group librarygroup --name library-system-karimov1211 --startup-file "gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app"
+
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
           app-name: 'library-system-karimov1211'
-
-          # slot-name: 'Production' # Olib tashlandi, chunki default holatda shundoq ham Production-ga boradi
+          package: release.zip
