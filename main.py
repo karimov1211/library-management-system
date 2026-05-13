@@ -1,6 +1,6 @@
 """
 Avtomatlashtirilgan Kutubxona Tizimi - FastAPI + Uvicorn Backend.
-Version: 1.0.1
+Version: 1.0.2
 """
 import os
 from fastapi import FastAPI, Request, Form, Depends, HTTPException
@@ -8,6 +8,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from database.db_manager import DatabaseManager
 from models import Author, Book, Borrower, Loan
@@ -15,6 +16,7 @@ import config
 
 app = FastAPI(title="Library Management API")
 app.add_middleware(SessionMiddleware, secret_key=config.SECRET_KEY)
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 
 # Static va Templates yo'llari
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -68,8 +70,13 @@ async def delete_author(request: Request, author_id: int):
     return RedirectResponse(url="/authors", status_code=303)
 
 @app.get("/books", response_class=HTMLResponse)
-async def books(request: Request):
-    return templates.TemplateResponse(request=request, name="books.html", context={"books": db.get_all_books(), "authors": db.get_all_authors(), "messages": get_flash_messages(request)})
+async def books(request: Request, q: str = None):
+    book_list = db.search_books(q) if q else db.get_all_books()
+    return templates.TemplateResponse(request=request, name="books.html", context={"books": book_list, "authors": db.get_all_authors(), "search": q, "messages": get_flash_messages(request)})
+
+@app.get("/books/search", response_class=HTMLResponse)
+async def search_books(request: Request, q: str = None):
+    return await books(request, q)
 
 @app.post("/books/add")
 async def add_book(request: Request, title: str = Form(...), isbn: str = Form(None), year: int = Form(None), genre: str = Form(None), pages: int = Form(None), author_id: int = Form(None), quantity: int = Form(1)):
@@ -100,6 +107,12 @@ async def add_borrower(request: Request, first_name: str = Form(...), last_name:
     add_flash_message(request, f"Ijarachchi '{borrower.full_name}' qo'shildi!", "success")
     return RedirectResponse(url="/borrowers", status_code=303)
 
+@app.get("/borrowers/delete/{borrower_id}")
+async def delete_borrower(request: Request, borrower_id: int):
+    db.delete_borrower(borrower_id)
+    add_flash_message(request, "Ijarachchi o'chirildi!", "success")
+    return RedirectResponse(url="/borrowers", status_code=303)
+
 @app.get("/loans", response_class=HTMLResponse)
 async def loans(request: Request):
     return templates.TemplateResponse(request=request, name="loans.html", context={"loans": db.get_all_loans(), "books": db.get_all_books(), "borrowers": db.get_all_borrowers(), "messages": get_flash_messages(request)})
@@ -115,6 +128,11 @@ async def add_loan(request: Request, book_id: int = Form(...), borrower_id: int 
 async def return_loan(request: Request, loan_id: int):
     db.return_loan(loan_id)
     add_flash_message(request, "Kitob qaytarildi!", "success")
+    return RedirectResponse(url="/loans", status_code=303)
+
+@app.get("/loans/delete/{loan_id}")
+async def delete_loan(request: Request, loan_id: int):
+    add_flash_message(request, "Ijara o'chirildi!", "info")
     return RedirectResponse(url="/loans", status_code=303)
 
 if __name__ == "__main__":
