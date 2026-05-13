@@ -68,8 +68,8 @@ jobs:
         with:
           inlineScript: |
             sleep 15
-            az webapp log download --resource-group librarygroup --name library-system-karimov1211
-            unzip -o download.zip -d azure_logs
+            az webapp log download --resource-group librarygroup --name library-system-karimov1211 --log-file webapp_logs.zip
+            python -m zipfile -e webapp_logs.zip azure_logs
             echo "--- DOCKER LOGS ---"
             cat azure_logs/LogFiles/*.log 2>/dev/null || true
             cat azure_logs/LogFiles/docker/*.log 2>/dev/null || true
