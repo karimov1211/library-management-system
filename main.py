@@ -1,5 +1,6 @@
 """
 Avtomatlashtirilgan Kutubxona Tizimi - FastAPI + Uvicorn Backend.
+Version: 1.0.1
 """
 import os
 from fastapi import FastAPI, Request, Form, Depends, HTTPException
