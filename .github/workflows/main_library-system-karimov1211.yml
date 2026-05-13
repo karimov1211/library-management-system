@@ -49,6 +49,24 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_84523DD21F534B3E8FC51A6CACCC5A2F }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_DEE75CAEF33F41918C85B32AA8B1C23A }}
 
+      - name: Set App Settings
+        uses: azure/appservice-settings@v1
+        with:
+          app-name: 'library-system-karimov1211'
+          app-settings-json: |
+            [
+                {
+                    "name": "WEBSITE_RUN_FROM_PACKAGE",
+                    "value": "1",
+                    "slotSetting": false
+                },
+                {
+                    "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
+                    "value": "false",
+                    "slotSetting": false
+                }
+            ]
+
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
