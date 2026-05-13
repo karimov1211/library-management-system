@@ -51,7 +51,7 @@ async def index(request: Request):
     return templates.TemplateResponse(request=request, name="index.html", context={"stats": stats, "messages": get_flash_messages(request)})
 
 @app.get("/authors", response_class=HTMLResponse)
-async def authors_page(request: Request):
+async def authors(request: Request):
     return templates.TemplateResponse(request=request, name="authors.html", context={"authors": db.get_all_authors(), "messages": get_flash_messages(request)})
 
 @app.post("/authors/add")
@@ -68,7 +68,7 @@ async def delete_author(request: Request, author_id: int):
     return RedirectResponse(url="/authors", status_code=303)
 
 @app.get("/books", response_class=HTMLResponse)
-async def books_page(request: Request):
+async def books(request: Request):
     return templates.TemplateResponse(request=request, name="books.html", context={"books": db.get_all_books(), "authors": db.get_all_authors(), "messages": get_flash_messages(request)})
 
 @app.post("/books/add")
@@ -90,7 +90,7 @@ async def api_search_books(q: str = ""):
     return {"success": True, "data": [b.to_dict() for b in books]}
 
 @app.get("/borrowers", response_class=HTMLResponse)
-async def borrowers_page(request: Request):
+async def borrowers(request: Request):
     return templates.TemplateResponse(request=request, name="borrowers.html", context={"borrowers": db.get_all_borrowers(), "messages": get_flash_messages(request)})
 
 @app.post("/borrowers/add")
@@ -101,7 +101,7 @@ async def add_borrower(request: Request, first_name: str = Form(...), last_name:
     return RedirectResponse(url="/borrowers", status_code=303)
 
 @app.get("/loans", response_class=HTMLResponse)
-async def loans_page(request: Request):
+async def loans(request: Request):
     return templates.TemplateResponse(request=request, name="loans.html", context={"loans": db.get_all_loans(), "books": db.get_all_books(), "borrowers": db.get_all_borrowers(), "messages": get_flash_messages(request)})
 
 @app.post("/loans/add")
