@@ -48,11 +48,11 @@ def add_flash_message(request: Request, message: str, category: str = "info"):
 async def index(request: Request):
     try: stats = db.get_statistics()
     except: stats = {'total_books': 0, 'available_books': 0, 'total_authors': 0, 'total_borrowers': 0, 'active_loans': 0, 'overdue_loans': 0}
-    return templates.TemplateResponse("index.html", {"request": request, "stats": stats, "messages": get_flash_messages(request)})
+    return templates.TemplateResponse(request=request, name="index.html", context={"stats": stats, "messages": get_flash_messages(request)})
 
 @app.get("/authors", response_class=HTMLResponse)
 async def authors_page(request: Request):
-    return templates.TemplateResponse("authors.html", {"request": request, "authors": db.get_all_authors(), "messages": get_flash_messages(request)})
+    return templates.TemplateResponse(request=request, name="authors.html", context={"authors": db.get_all_authors(), "messages": get_flash_messages(request)})
 
 @app.post("/authors/add")
 async def add_author(request: Request, first_name: str = Form(...), last_name: str = Form(...), birth_year: int = Form(None), nationality: str = Form(None), biography: str = Form(None)):
@@ -69,7 +69,7 @@ async def delete_author(request: Request, author_id: int):
 
 @app.get("/books", response_class=HTMLResponse)
 async def books_page(request: Request):
-    return templates.TemplateResponse("books.html", {"request": request, "books": db.get_all_books(), "authors": db.get_all_authors(), "messages": get_flash_messages(request)})
+    return templates.TemplateResponse(request=request, name="books.html", context={"books": db.get_all_books(), "authors": db.get_all_authors(), "messages": get_flash_messages(request)})
 
 @app.post("/books/add")
 async def add_book(request: Request, title: str = Form(...), isbn: str = Form(None), year: int = Form(None), genre: str = Form(None), pages: int = Form(None), author_id: int = Form(None), quantity: int = Form(1)):
@@ -91,7 +91,7 @@ async def api_search_books(q: str = ""):
 
 @app.get("/borrowers", response_class=HTMLResponse)
 async def borrowers_page(request: Request):
-    return templates.TemplateResponse("borrowers.html", {"request": request, "borrowers": db.get_all_borrowers(), "messages": get_flash_messages(request)})
+    return templates.TemplateResponse(request=request, name="borrowers.html", context={"borrowers": db.get_all_borrowers(), "messages": get_flash_messages(request)})
 
 @app.post("/borrowers/add")
 async def add_borrower(request: Request, first_name: str = Form(...), last_name: str = Form(...), email: str = Form(None), phone: str = Form(None), address: str = Form(None)):
@@ -102,7 +102,7 @@ async def add_borrower(request: Request, first_name: str = Form(...), last_name:
 
 @app.get("/loans", response_class=HTMLResponse)
 async def loans_page(request: Request):
-    return templates.TemplateResponse("loans.html", {"request": request, "loans": db.get_all_loans(), "books": db.get_all_books(), "borrowers": db.get_all_borrowers(), "messages": get_flash_messages(request)})
+    return templates.TemplateResponse(request=request, name="loans.html", context={"loans": db.get_all_loans(), "books": db.get_all_books(), "borrowers": db.get_all_borrowers(), "messages": get_flash_messages(request)})
 
 @app.post("/loans/add")
 async def add_loan(request: Request, book_id: int = Form(...), borrower_id: int = Form(...)):
