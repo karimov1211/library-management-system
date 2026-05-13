@@ -19,11 +19,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
+      - name: Zip artifact for deployment
+        run: zip -r release.zip . -x "antenv/*" ".git/*" ".github/*"
+      
       - name: Upload artifact for deployment jobs
         uses: actions/upload-artifact@v4
         with:
           name: python-app
-          path: .
+          path: release.zip
 
 
   deploy:
@@ -52,4 +55,4 @@ jobs:
         with:
           app-name: 'library-system-karimov1211'
           slot-name: 'Production'
-          
+          package: release.zip
