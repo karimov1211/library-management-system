@@ -15,10 +15,10 @@ import config
 app = FastAPI(title="Library Management API")
 app.add_middleware(SessionMiddleware, secret_key=config.SECRET_KEY)
 
+# Static va Templates yo'llari
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-FRONTEND_DIR = os.path.join(BASE_DIR, '..', 'frontend')
-templates = Jinja2Templates(directory=os.path.join(FRONTEND_DIR, 'templates'))
-app.mount("/static", StaticFiles(directory=os.path.join(FRONTEND_DIR, 'static')), name="static")
+templates = Jinja2Templates(directory=os.path.join(BASE_DIR, 'templates'))
+app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, 'static')), name="static")
 
 db = DatabaseManager()
 
