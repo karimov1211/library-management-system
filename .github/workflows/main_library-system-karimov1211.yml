@@ -53,7 +53,7 @@ jobs:
         uses: azure/appservice-settings@v1
         with:
           app-name: 'library-system-karimov1211'
-          settings: |
+          app-settings: |
             WEBSITE_RUN_FROM_PACKAGE=1
             SCM_DO_BUILD_DURING_DEPLOYMENT=false
 
