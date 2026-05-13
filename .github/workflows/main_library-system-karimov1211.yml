@@ -53,19 +53,9 @@ jobs:
         uses: azure/appservice-settings@v1
         with:
           app-name: 'library-system-karimov1211'
-          app-settings-json: |
-            [
-                {
-                    "name": "WEBSITE_RUN_FROM_PACKAGE",
-                    "value": "1",
-                    "slotSetting": false
-                },
-                {
-                    "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
-                    "value": "false",
-                    "slotSetting": false
-                }
-            ]
+          settings: |
+            WEBSITE_RUN_FROM_PACKAGE=1
+            SCM_DO_BUILD_DURING_DEPLOYMENT=false
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
