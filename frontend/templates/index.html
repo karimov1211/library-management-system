@@ -12,105 +12,74 @@
     </div>
 </section>
 
-<!-- ===== STATISTIKA KARTOCHKALAR ===== -->
-<section class="stats-section">
-    <h2 class="section-title">
-        <i class="fas fa-chart-bar"></i> Umumiy Statistika
-    </h2>
-    <div class="stats-grid">
-        <div class="stat-card stat-books">
-            <div class="stat-icon">
-                <i class="fas fa-book"></i>
+<!-- ===== STATISTIKA DASHBOARD ===== -->
+<section class="dashboard-section">
+    <div class="dashboard-grid">
+        <!-- Statistik kartochkalar -->
+        <div class="stats-container">
+            <h2 class="section-title"><i class="fas fa-chart-line"></i> Umumiy ko'rsatkichlar</h2>
+            <div class="stats-grid">
+                <div class="stat-card stat-books">
+                    <div class="stat-icon"><i class="fas fa-book"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-number">{{ stats.total_books }}</span>
+                        <span class="stat-label">Kitoblar</span>
+                    </div>
+                </div>
+                <div class="stat-card stat-available">
+                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-number">{{ stats.available_books }}</span>
+                        <span class="stat-label">Mavjud</span>
+                    </div>
+                </div>
+                <div class="stat-card stat-loans">
+                    <div class="stat-icon"><i class="fas fa-handshake"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-number">{{ stats.active_loans }}</span>
+                        <span class="stat-label">Ijaralar</span>
+                    </div>
+                </div>
+                <div class="stat-card stat-overdue">
+                    <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-number">{{ stats.overdue_loans }}</span>
+                        <span class="stat-label">Muddati o'tgan</span>
+                    </div>
+                </div>
             </div>
-            <div class="stat-info">
-                <span class="stat-number" data-count="{{ stats.total_books }}">{{ stats.total_books }}</span>
-                <span class="stat-label">Jami Kitoblar</span>
-            </div>
-            <div class="stat-wave"></div>
         </div>
 
-        <div class="stat-card stat-available">
-            <div class="stat-icon">
-                <i class="fas fa-book-open"></i>
+        <!-- Grafik (Chart) -->
+        <div class="chart-container card glass-card">
+            <div class="card-header">
+                <h2><i class="fas fa-chart-pie"></i> Kutubxona holati</h2>
             </div>
-            <div class="stat-info">
-                <span class="stat-number" data-count="{{ stats.available_books }}">{{ stats.available_books }}</span>
-                <span class="stat-label">Mavjud Kitoblar</span>
+            <div class="card-body">
+                <canvas id="libraryChart"></canvas>
             </div>
-            <div class="stat-wave"></div>
-        </div>
-
-        <div class="stat-card stat-authors">
-            <div class="stat-icon">
-                <i class="fas fa-feather-alt"></i>
-            </div>
-            <div class="stat-info">
-                <span class="stat-number" data-count="{{ stats.total_authors }}">{{ stats.total_authors }}</span>
-                <span class="stat-label">Mualliflar</span>
-            </div>
-            <div class="stat-wave"></div>
-        </div>
-
-        <div class="stat-card stat-borrowers">
-            <div class="stat-icon">
-                <i class="fas fa-users"></i>
-            </div>
-            <div class="stat-info">
-                <span class="stat-number" data-count="{{ stats.total_borrowers }}">{{ stats.total_borrowers }}</span>
-                <span class="stat-label">Ijarachchilar</span>
-            </div>
-            <div class="stat-wave"></div>
-        </div>
-
-        <div class="stat-card stat-loans">
-            <div class="stat-icon">
-                <i class="fas fa-handshake"></i>
-            </div>
-            <div class="stat-info">
-                <span class="stat-number" data-count="{{ stats.active_loans }}">{{ stats.active_loans }}</span>
-                <span class="stat-label">Faol Ijaralar</span>
-            </div>
-            <div class="stat-wave"></div>
-        </div>
-
-        <div class="stat-card stat-overdue">
-            <div class="stat-icon">
-                <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <div class="stat-info">
-                <span class="stat-number" data-count="{{ stats.overdue_loans }}">{{ stats.overdue_loans }}</span>
-                <span class="stat-label">Muddati O'tgan</span>
-            </div>
-            <div class="stat-wave"></div>
         </div>
     </div>
 </section>
 
 <!-- ===== TEZKOR HAVOLALAR ===== -->
 <section class="quick-actions-section">
-    <h2 class="section-title">
-        <i class="fas fa-bolt"></i> Tezkor Amallar
-    </h2>
+    <h2 class="section-title"><i class="fas fa-bolt"></i> Tezkor Amallar</h2>
     <div class="actions-grid">
         <a href="{{ url_for('books') }}" class="action-card">
             <div class="action-icon"><i class="fas fa-plus-circle"></i></div>
-            <h3>Kitob Qo'shish</h3>
-            <p>Yangi kitobni kutubxonaga qo'shish</p>
+            <h3>Yangi Kitob</h3>
+            <p>Ro'yxatga kitob qo'shish</p>
         </a>
         <a href="{{ url_for('authors') }}" class="action-card">
             <div class="action-icon"><i class="fas fa-user-plus"></i></div>
-            <h3>Muallif Qo'shish</h3>
-            <p>Yangi muallif ma'lumotlarini kiritish</p>
+            <h3>Muallif</h3>
+            <p>Muallif ma'lumotlari</p>
         </a>
         <a href="{{ url_for('loans') }}" class="action-card">
-            <div class="action-icon"><i class="fas fa-hand-holding"></i></div>
+            <div class="action-icon"><i class="fas fa-exchange-alt"></i></div>
             <h3>Kitob Berish</h3>
-            <p>Kitobni ijaraga berish</p>
-        </a>
-        <a href="{{ url_for('borrowers') }}" class="action-card">
-            <div class="action-icon"><i class="fas fa-id-card"></i></div>
-            <h3>Ijarachchi Ro'yxati</h3>
-            <p>Barcha ijarachchilarni ko'rish</p>
+            <p>Ijara jarayoni</p>
         </a>
     </div>
 </section>
@@ -138,4 +107,36 @@
         </div>
     </div>
 </section>
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const ctx = document.getElementById('libraryChart');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Mavjud', 'Ijarada', 'Muddati o\'tgan'],
+                datasets: [{
+                    data: [{{ stats.available_books }}, {{ stats.active_loans }}, {{ stats.overdue_loans }}],
+                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                    borderColor: 'rgba(255, 255, 255, 0.1)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#94a3b8', font: { family: 'Inter', size: 12 } }
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
 {% endblock %}

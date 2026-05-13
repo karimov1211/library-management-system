@@ -138,6 +138,18 @@ def search_books():
     return render_template('books.html', books=book_list, authors=author_list, search=keyword)
 
 
+@app.route('/api/books/search')
+def api_search_books():
+    """JSON formatida qidiruv natijalarini qaytarish (AJAX uchun)."""
+    keyword = request.args.get('q', '')
+    try:
+        books = db.search_books(keyword) if keyword else db.get_all_books()
+        # Kitob obyektlarini dictga o'tkazamiz
+        return {"success": True, "data": [b.to_dict() for b in books]}
+    except Exception as e:
+        return {"success": False, "error": str(e)}, 500
+
+
 # ==========================================
 # IJARACHCHILAR (BORROWERS)
 # ==========================================

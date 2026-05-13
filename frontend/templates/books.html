@@ -123,4 +123,62 @@
         </div>
     </div>
 </section>
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('searchInput');
+    const tableBody = document.querySelector('#booksTable tbody');
+
+    if (searchInput && tableBody) {
+        searchInput.addEventListener('input', debounce(async (e) => {
+            const query = e.target.value;
+            try {
+                const response = await fetch(`/api/books/search?q=${encodeURIComponent(query)}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    updateTable(result.data);
+                }
+            } catch (error) {
+                console.error('Qidiruvda xatolik:', error);
+            }
+        }, 300));
+    }
+
+    function updateTable(books) {
+        tableBody.innerHTML = '';
+        if (books.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="9" class="empty-state">Kitob topilmadi</td></tr>';
+            return;
+        }
+        books.forEach(book => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${book.id}</td>
+                <td class="td-title">${book.title}</td>
+                <td><code>${book.isbn || '—'}</code></td>
+                <td>${book.year || '—'}</td>
+                <td>${book.genre ? `<span class="badge badge-genre">${book.genre}</span>` : '—'}</td>
+                <td>${book.author_name || '—'}</td>
+                <td class="td-center">${book.quantity}</td>
+                <td>${book.available ? '<span class="badge badge-success">Mavjud</span>' : '<span class="badge badge-danger">Ijarada</span>'}</td>
+                <td>
+                    <a href="/books/delete/${book.id}" class="btn btn-danger btn-sm" onclick="return confirm('O\\'chirmoqchimisiz?')"><i class="fas fa-trash"></i></a>
+                </td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    function debounce(func, delay) {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
+});
+</script>
+{% endblock %}
 {% endblock %}

@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
@@ -56,19 +57,17 @@
     </nav>
 
     <!-- ===== FLASH XABARLAR ===== -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-        <div class="flash-container" id="flashContainer">
-            {% for category, message in messages %}
-            <div class="flash-message flash-{{ category }}" onclick="this.remove()">
-                <i class="fas {% if category == 'success' %}fa-check-circle{% elif category == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
-                <span>{{ message }}</span>
-                <button class="flash-close"><i class="fas fa-times"></i></button>
-            </div>
-            {% endfor %}
+    {% if messages %}
+    <div class="flash-container" id="flashContainer">
+        {% for category, message in messages %}
+        <div class="flash-message flash-{{ category }}" onclick="this.remove()">
+            <i class="fas {% if category == 'success' %}fa-check-circle{% elif category == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %}"></i>
+            <span>{{ message }}</span>
+            <button class="flash-close"><i class="fas fa-times"></i></button>
         </div>
-        {% endif %}
-    {% endwith %}
+        {% endfor %}
+    </div>
+    {% endif %}
 
     <!-- ===== ASOSIY KONTENT ===== -->
     <main class="main-content">
