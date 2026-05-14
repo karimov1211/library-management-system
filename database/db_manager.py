@@ -2,9 +2,13 @@
 Azure SQL Database boshqaruvchisi.
 Barcha CRUD operatsiyalari shu yerda amalga oshiriladi.
 """
-import pymssql
+import pyodbc
 import config
+import logging
 
+# Loglarni sozlash
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class DatabaseManager:
     """
@@ -21,28 +25,34 @@ class DatabaseManager:
         return cls._instance
 
     def connect(self):
-        """Azure SQL bazasiga ulanish."""
+        """Azure SQL bazasiga ulanish (pyodbc orqali)."""
         try:
-            self._connection = pymssql.connect(server=config.AZURE_SQL_SERVER, user=config.AZURE_SQL_USERNAME, password=config.AZURE_SQL_PASSWORD, database=config.AZURE_SQL_DATABASE)
-            print("Azure SQL bazasiga muvaffaqiyatli ulandi!")
+            # Azure SQL uchun pyodbc va Connection String tavsiya etiladi
+            self._connection = pyodbc.connect(config.AZURE_SQL_CONNECTION_STRING)
+            logger.info("Azure SQL bazasiga muvaffaqiyatli ulandi!")
             return True
-        except pymssql.Error as e:
-            print(f"Ulanish xatosi: {e}")
+        except Exception as e:
+            logger.error(f"Ulanish xatosi: {e}")
+            self._connection = None
             return False
 
     def disconnect(self):
         """Ulanishni yopish."""
         if self._connection:
-            self._connection.close()
+            try:
+                self._connection.close()
+            except:
+                pass
             self._connection = None
 
     def get_connection(self):
         """Joriy ulanishni olish."""
         if not self._connection:
-            self.connect()
+            if not self.connect():
+                raise ConnectionError("Ma'lumotlar bazasiga ulanib bo'lmadi.")
         return self._connection
 
-    def execute_query(self, query, params=None):
+    def execute_query(self, query, params=None, commit=True):
         """SQL so'rovni bajarish (INSERT, UPDATE, DELETE)."""
         conn = self.get_connection()
         cursor = conn.cursor()
@@ -51,11 +61,12 @@ class DatabaseManager:
                 cursor.execute(query, params)
             else:
                 cursor.execute(query)
-            conn.commit()
+            if commit:
+                conn.commit()
             return cursor
-        except pymssql.Error as e:
+        except pyodbc.Error as e:
             conn.rollback()
-            print(f"So'rov xatosi: {e}")
+            logger.error(f"So'rov xatosi: {e}")
             raise
 
     def fetch_all(self, query, params=None):
@@ -68,8 +79,8 @@ class DatabaseManager:
             else:
                 cursor.execute(query)
             return cursor.fetchall()
-        except pymssql.Error as e:
-            print(f"So'rov xatosi: {e}")
+        except pyodbc.Error as e:
+            logger.error(f"So'rov xatosi: {e}")
             raise
 
     def fetch_one(self, query, params=None):
@@ -82,8 +93,8 @@ class DatabaseManager:
             else:
                 cursor.execute(query)
             return cursor.fetchone()
-        except pymssql.Error as e:
-            print(f"So'rov xatosi: {e}")
+        except pyodbc.Error as e:
+            logger.error(f"So'rov xatosi: {e}")
             raise
 
     # ==========================================
@@ -162,15 +173,16 @@ class DatabaseManager:
         query = """
             INSERT INTO Authors (first_name, last_name, birth_year, nationality, biography)
             OUTPUT INSERTED.id
-            VALUES (%s, %s, %s, %s, %s)
+            VALUES (?, ?, ?, ?, ?)
         """
         cursor = self.execute_query(query, (
             author.first_name, author.last_name,
             author.birth_year, author.nationality, author.biography
-        ))
+        ), commit=False)
         row = cursor.fetchone()
         if row:
             author.id = row[0]
+        self.get_connection().commit()
         return author
 
     def get_all_authors(self):
@@ -182,14 +194,14 @@ class DatabaseManager:
     def get_author(self, author_id):
         """Muallifni ID bo'yicha olish."""
         from models.author import Author
-        row = self.fetch_one("SELECT * FROM Authors WHERE id = %s", (author_id,))
+        row = self.fetch_one("SELECT * FROM Authors WHERE id = ?", (author_id,))
         return Author.from_db_row(row) if row else None
 
     def update_author(self, author):
         """Muallif ma'lumotlarini yangilash."""
         query = """
-            UPDATE Authors SET first_name=%s, last_name=%s, birth_year=%s,
-            nationality=%s, biography=%s WHERE id=%s
+            UPDATE Authors SET first_name=?, last_name=?, birth_year=?,
+            nationality=?, biography=? WHERE id=?
         """
         self.execute_query(query, (
             author.first_name, author.last_name, author.birth_year,
@@ -198,7 +210,7 @@ class DatabaseManager:
 
     def delete_author(self, author_id):
         """Muallifni o'chirish."""
-        self.execute_query("DELETE FROM Authors WHERE id = %s", (author_id,))
+        self.execute_query("DELETE FROM Authors WHERE id = ?", (author_id,))
 
     # ==========================================
     # BOOKS CRUD
@@ -209,15 +221,16 @@ class DatabaseManager:
         query = """
             INSERT INTO Books (title, isbn, year, genre, pages, author_id, available, quantity)
             OUTPUT INSERTED.id
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """
         cursor = self.execute_query(query, (
             book.title, book.isbn, book.year, book.genre,
             book.pages, book.author_id, book.available, book.quantity
-        ))
+        ), commit=False)
         row = cursor.fetchone()
         if row:
             book.id = row[0]
+        self.get_connection().commit()
         return book
 
     def get_all_books(self):
@@ -239,14 +252,14 @@ class DatabaseManager:
     def get_book(self, book_id):
         """Kitobni ID bo'yicha olish."""
         from models.book import Book
-        row = self.fetch_one("SELECT * FROM Books WHERE id = %s", (book_id,))
+        row = self.fetch_one("SELECT * FROM Books WHERE id = ?", (book_id,))
         return Book.from_db_row(row) if row else None
 
     def update_book(self, book):
         """Kitob ma'lumotlarini yangilash."""
         query = """
-            UPDATE Books SET title=%s, isbn=%s, year=%s, genre=%s,
-            pages=%s, author_id=%s, available=%s, quantity=%s WHERE id=%s
+            UPDATE Books SET title=?, isbn=?, year=?, genre=?,
+            pages=?, author_id=?, available=?, quantity=? WHERE id=?
         """
         self.execute_query(query, (
             book.title, book.isbn, book.year, book.genre,
@@ -255,14 +268,14 @@ class DatabaseManager:
 
     def delete_book(self, book_id):
         """Kitobni o'chirish."""
-        self.execute_query("DELETE FROM Books WHERE id = %s", (book_id,))
+        self.execute_query("DELETE FROM Books WHERE id = ?", (book_id,))
 
     def search_books(self, keyword):
         """Kitoblarni qidirish."""
         from models.book import Book
         query = """
             SELECT * FROM Books
-            WHERE title LIKE %s OR isbn LIKE %s OR genre LIKE %s
+            WHERE title LIKE ? OR isbn LIKE ? OR genre LIKE ?
         """
         pattern = f"%{keyword}%"
         rows = self.fetch_all(query, (pattern, pattern, pattern))
@@ -277,15 +290,16 @@ class DatabaseManager:
         query = """
             INSERT INTO Borrowers (first_name, last_name, email, phone, address)
             OUTPUT INSERTED.id
-            VALUES (%s, %s, %s, %s, %s)
+            VALUES (?, ?, ?, ?, ?)
         """
         cursor = self.execute_query(query, (
             borrower.first_name, borrower.last_name,
             borrower.email, borrower.phone, borrower.address
-        ))
+        ), commit=False)
         row = cursor.fetchone()
         if row:
             borrower.id = row[0]
+        self.get_connection().commit()
         return borrower
 
     def get_all_borrowers(self):
@@ -297,14 +311,14 @@ class DatabaseManager:
     def get_borrower(self, borrower_id):
         """Ijaracchini ID bo'yicha olish."""
         from models.borrower import Borrower
-        row = self.fetch_one("SELECT * FROM Borrowers WHERE id = %s", (borrower_id,))
+        row = self.fetch_one("SELECT * FROM Borrowers WHERE id = ?", (borrower_id,))
         return Borrower.from_db_row(row) if row else None
 
     def update_borrower(self, borrower):
         """Ijarachchi ma'lumotlarini yangilash."""
         query = """
-            UPDATE Borrowers SET first_name=%s, last_name=%s, email=%s,
-            phone=%s, address=%s, active=%s WHERE id=%s
+            UPDATE Borrowers SET first_name=?, last_name=?, email=?,
+            phone=?, address=?, active=? WHERE id=?
         """
         self.execute_query(query, (
             borrower.first_name, borrower.last_name, borrower.email,
@@ -313,7 +327,7 @@ class DatabaseManager:
 
     def delete_borrower(self, borrower_id):
         """Ijaracchini o'chirish."""
-        self.execute_query("DELETE FROM Borrowers WHERE id = %s", (borrower_id,))
+        self.execute_query("DELETE FROM Borrowers WHERE id = ?", (borrower_id,))
 
     # ==========================================
     # LOANS CRUD
@@ -324,36 +338,38 @@ class DatabaseManager:
         query = """
             INSERT INTO Loans (book_id, borrower_id, loan_date, due_date, status)
             OUTPUT INSERTED.id
-            VALUES (%s, %s, %s, %s, %s)
+            VALUES (?, ?, ?, ?, ?)
         """
         cursor = self.execute_query(query, (
             loan.book_id, loan.borrower_id,
             loan.loan_date, loan.due_date, loan.status
-        ))
+        ), commit=False)
         row = cursor.fetchone()
         if row:
             loan.id = row[0]
+        
         # Kitob mavjudligini yangilash
         self.execute_query(
-            "UPDATE Books SET quantity = quantity - 1 WHERE id = %s", (loan.book_id,)
+            "UPDATE Books SET quantity = quantity - 1 WHERE id = ?", (loan.book_id,), commit=False
         )
         self.execute_query(
-            "UPDATE Books SET available = CASE WHEN quantity > 0 THEN 1 ELSE 0 END WHERE id = %s",
-            (loan.book_id,)
+            "UPDATE Books SET available = CASE WHEN quantity > 0 THEN 1 ELSE 0 END WHERE id = ?",
+            (loan.book_id,), commit=False
         )
+        self.get_connection().commit()
         return loan
 
     def return_loan(self, loan_id):
         """Kitobni qaytarish."""
         from datetime import datetime
-        loan_row = self.fetch_one("SELECT * FROM Loans WHERE id = %s", (loan_id,))
+        loan_row = self.fetch_one("SELECT * FROM Loans WHERE id = ?", (loan_id,))
         if loan_row:
             self.execute_query(
-                "UPDATE Loans SET return_date = %s, status = 'returned' WHERE id = %s",
+                "UPDATE Loans SET return_date = ?, status = 'returned' WHERE id = ?",
                 (datetime.now(), loan_id)
             )
             self.execute_query(
-                "UPDATE Books SET quantity = quantity + 1, available = 1 WHERE id = %s",
+                "UPDATE Books SET quantity = quantity + 1, available = 1 WHERE id = ?",
                 (loan_row[1],)
             )
 

@@ -48,8 +48,14 @@ def add_flash_message(request: Request, message: str, category: str = "info"):
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    try: stats = db.get_statistics()
-    except: stats = {'total_books': 0, 'available_books': 0, 'total_authors': 0, 'total_borrowers': 0, 'active_loans': 0, 'overdue_loans': 0}
+    try:
+        stats = db.get_statistics()
+    except Exception as e:
+        print(f"Index: Statistika olishda xatolik: {e}")
+        # Xatolik bo'lsa default qiymatlar
+        stats = {'total_books': 0, 'available_books': 0, 'total_authors': 0, 'total_borrowers': 0, 'active_loans': 0, 'overdue_loans': 0}
+        add_flash_message(request, f"Baza bilan bog'lanishda muammo: {str(e)}", "error")
+    
     return templates.TemplateResponse(request=request, name="index.html", context={"stats": stats, "messages": get_flash_messages(request)})
 
 @app.get("/authors", response_class=HTMLResponse)
