@@ -10,6 +10,9 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Connection pooling-ni o'chirish (Azure SQL bilan ba'zida muammo tug'diradi)
+pyodbc.pooling = False
+
 class DatabaseManager:
     """
     Azure SQL bazasiga ulanish va CRUD operatsiyalarini boshqaruvchi klass.
@@ -46,17 +49,29 @@ class DatabaseManager:
             self._connection = None
 
     def get_connection(self):
-        """Joriy ulanishni olish."""
+        """Joriy ulanishni olish va uning holatini tekshirish."""
+        # Agar ulanish obyekti mavjud bo'lmasa, ulanamiz
         if not self._connection:
             if not self.connect():
                 raise ConnectionError("Ma'lumotlar bazasiga ulanib bo'lmadi.")
+        
+        # Ulanish o'lik yoki yo'qligini tekshiramiz (select 1 orqali)
+        try:
+            cursor = self._connection.cursor()
+            cursor.execute("SELECT 1")
+            cursor.close()
+        except:
+            logger.info("Eski ulanish uzilgan, qayta ulanishga harakat qilinmoqda...")
+            if not self.connect():
+                raise ConnectionError("Ma'lumotlar bazasiga ulanib bo'lmadi.")
+                
         return self._connection
 
     def execute_query(self, query, params=None, commit=True):
         """SQL so'rovni bajarish (INSERT, UPDATE, DELETE)."""
-        conn = self.get_connection()
-        cursor = conn.cursor()
         try:
+            conn = self.get_connection()
+            cursor = conn.cursor()
             if params:
                 cursor.execute(query, params)
             else:
@@ -64,38 +79,61 @@ class DatabaseManager:
             if commit:
                 conn.commit()
             return cursor
-        except pyodbc.Error as e:
-            conn.rollback()
-            logger.error(f"So'rov xatosi: {e}")
-            raise
+        except (pyodbc.Error, ConnectionError) as e:
+            # Agar ulanish xatosi bo'lsa, bir marta qayta urinib ko'ramiz
+            logger.error(f"So'rovda xatolik yuz berdi: {e}. Qayta urinib ko'rilmoqda...")
+            self.disconnect() # Eski ulanishni yopamiz
+            conn = self.get_connection() # Qayta ulanamiz
+            cursor = conn.cursor()
+            if params:
+                cursor.execute(query, params)
+            else:
+                cursor.execute(query)
+            if commit:
+                conn.commit()
+            return cursor
 
     def fetch_all(self, query, params=None):
         """SELECT so'rovi — barcha natijalarni olish."""
-        conn = self.get_connection()
-        cursor = conn.cursor()
         try:
+            conn = self.get_connection()
+            cursor = conn.cursor()
             if params:
                 cursor.execute(query, params)
             else:
                 cursor.execute(query)
             return cursor.fetchall()
-        except pyodbc.Error as e:
-            logger.error(f"So'rov xatosi: {e}")
-            raise
+        except (pyodbc.Error, ConnectionError) as e:
+            logger.error(f"Fetch all xatosi: {e}. Qayta urinib ko'rilmoqda...")
+            self.disconnect()
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            if params:
+                cursor.execute(query, params)
+            else:
+                cursor.execute(query)
+            return cursor.fetchall()
 
     def fetch_one(self, query, params=None):
         """SELECT so'rovi — bitta natijani olish."""
-        conn = self.get_connection()
-        cursor = conn.cursor()
         try:
+            conn = self.get_connection()
+            cursor = conn.cursor()
             if params:
                 cursor.execute(query, params)
             else:
                 cursor.execute(query)
             return cursor.fetchone()
-        except pyodbc.Error as e:
-            logger.error(f"So'rov xatosi: {e}")
-            raise
+        except (pyodbc.Error, ConnectionError) as e:
+            logger.error(f"Fetch one xatosi: {e}. Qayta urinib ko'rilmoqda...")
+            self.disconnect()
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            if params:
+                cursor.execute(query, params)
+            else:
+                cursor.execute(query)
+            return cursor.fetchone()
 
     # ==========================================
     # JADVALLARNI YARATISH

@@ -3,12 +3,17 @@ Avtomatlashtirilgan Kutubxona Tizimi - FastAPI + Uvicorn Backend.
 Version: 1.0.2
 """
 import os
+import logging
 from fastapi import FastAPI, Request, Form, Depends, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
+
+# Loglarni sozlash
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 from database.db_manager import DatabaseManager
 from models import Author, Book, Borrower, Loan
@@ -60,7 +65,13 @@ async def index(request: Request):
 
 @app.get("/authors", response_class=HTMLResponse)
 async def authors(request: Request):
-    return templates.TemplateResponse(request=request, name="authors.html", context={"authors": db.get_all_authors(), "messages": get_flash_messages(request)})
+    try:
+        author_list = db.get_all_authors()
+    except Exception as e:
+        logger.error(f"Authors: Xatolik: {e}")
+        author_list = []
+        add_flash_message(request, f"Mualliflarni yuklashda xatolik: {str(e)}", "error")
+    return templates.TemplateResponse(request=request, name="authors.html", context={"authors": author_list, "messages": get_flash_messages(request)})
 
 @app.post("/authors/add")
 async def add_author(request: Request, first_name: str = Form(...), last_name: str = Form(...), birth_year: int = Form(None), nationality: str = Form(None), biography: str = Form(None)):
@@ -77,8 +88,15 @@ async def delete_author(request: Request, author_id: int):
 
 @app.get("/books", response_class=HTMLResponse)
 async def books(request: Request, q: str = None):
-    book_list = db.search_books(q) if q else db.get_all_books()
-    return templates.TemplateResponse(request=request, name="books.html", context={"books": book_list, "authors": db.get_all_authors(), "search": q, "messages": get_flash_messages(request)})
+    try:
+        book_list = db.search_books(q) if q else db.get_all_books()
+        authors_list = db.get_all_authors()
+    except Exception as e:
+        logger.error(f"Books: Xatolik: {e}")
+        book_list = []
+        authors_list = []
+        add_flash_message(request, f"Kitoblarni yuklashda xatolik: {str(e)}", "error")
+    return templates.TemplateResponse(request=request, name="books.html", context={"books": book_list, "authors": authors_list, "search": q, "messages": get_flash_messages(request)})
 
 @app.get("/books/search", response_class=HTMLResponse)
 async def search_books(request: Request, q: str = None):
@@ -104,7 +122,13 @@ async def api_search_books(q: str = ""):
 
 @app.get("/borrowers", response_class=HTMLResponse)
 async def borrowers(request: Request):
-    return templates.TemplateResponse(request=request, name="borrowers.html", context={"borrowers": db.get_all_borrowers(), "messages": get_flash_messages(request)})
+    try:
+        borrower_list = db.get_all_borrowers()
+    except Exception as e:
+        logger.error(f"Borrowers: Xatolik: {e}")
+        borrower_list = []
+        add_flash_message(request, f"Ijarachilarni yuklashda xatolik: {str(e)}", "error")
+    return templates.TemplateResponse(request=request, name="borrowers.html", context={"borrowers": borrower_list, "messages": get_flash_messages(request)})
 
 @app.post("/borrowers/add")
 async def add_borrower(request: Request, first_name: str = Form(...), last_name: str = Form(...), email: str = Form(None), phone: str = Form(None), address: str = Form(None)):
@@ -121,7 +145,17 @@ async def delete_borrower(request: Request, borrower_id: int):
 
 @app.get("/loans", response_class=HTMLResponse)
 async def loans(request: Request):
-    return templates.TemplateResponse(request=request, name="loans.html", context={"loans": db.get_all_loans(), "books": db.get_all_books(), "borrowers": db.get_all_borrowers(), "messages": get_flash_messages(request)})
+    try:
+        loans_list = db.get_all_loans()
+        books_list = db.get_all_books()
+        borrowers_list = db.get_all_borrowers()
+    except Exception as e:
+        logger.error(f"Loans: Xatolik: {e}")
+        loans_list = []
+        books_list = []
+        borrowers_list = []
+        add_flash_message(request, f"Ijaralarni yuklashda xatolik: {str(e)}", "error")
+    return templates.TemplateResponse(request=request, name="loans.html", context={"loans": loans_list, "books": books_list, "borrowers": borrowers_list, "messages": get_flash_messages(request)})
 
 @app.post("/loans/add")
 async def add_loan(request: Request, book_id: int = Form(...), borrower_id: int = Form(...)):

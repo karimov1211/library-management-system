@@ -30,6 +30,9 @@ AZURE_SQL_CONNECTION_STRING = (
     f"Uid={AZURE_SQL_USERNAME};"
     f"Pwd={AZURE_SQL_PASSWORD};"
     f"Encrypt=yes;"
-    f"TrustServerCertificate=no;"
+    f"TrustServerCertificate=yes;"
     f"Connection Timeout=30;"
+    f"ConnectRetryCount=3;"
+    f"ConnectRetryInterval=10;"
+    f"MultipleActiveResultSets=True;"
 )
