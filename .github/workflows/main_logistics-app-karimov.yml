@@ -67,6 +67,13 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_BFEDFF0AB8C24D90816D61C250D8B544 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_812A6829689D48B28688ACD3E74727D4 }}
 
+      - name: Configure Azure App Settings via CLI
+        uses: azure/cli@v2
+        with:
+          inlineScript: |
+            az webapp config appsettings set --resource-group azurehamdambek --name logistics-app-karimov --settings AZURE_SQL_SERVER="library-server-karimov1211.database.windows.net" AZURE_SQL_DATABASE="LibraryDB" AZURE_SQL_USERNAME="dbadmin" AZURE_SQL_PASSWORD="AzurePassword123!" AZURE_SQL_DRIVER="{ODBC Driver 17 for SQL Server}" SECRET_KEY="kutubxona-tizimi-maxfiy-kalit-2026" SCM_DO_BUILD_DURING_DEPLOYMENT=true
+            az webapp config set --resource-group azurehamdambek --name logistics-app-karimov --startup-file "gunicorn --bind=0.0.0.0 --timeout 600 -w 4 -k uvicorn.workers.UvicornWorker main:app"
+
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
