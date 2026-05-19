@@ -71,7 +71,7 @@ jobs:
         uses: azure/cli@v2
         with:
           inlineScript: |
-            az webapp config appsettings set --resource-group azurehamdambek --name logistics-app-karimov --settings AZURE_SQL_SERVER="library-server-karimov1211.database.windows.net" AZURE_SQL_DATABASE="LibraryDB" AZURE_SQL_USERNAME="dbadmin" AZURE_SQL_PASSWORD="AzurePassword123!" AZURE_SQL_DRIVER="{ODBC Driver 17 for SQL Server}" SECRET_KEY="kutubxona-tizimi-maxfiy-kalit-2026" SCM_DO_BUILD_DURING_DEPLOYMENT=true
+            az webapp config appsettings set --resource-group azurehamdambek --name logistics-app-karimov --settings AZURE_SQL_SERVER="logistics-server-karimov.database.windows.net" AZURE_SQL_DATABASE="logistics_db" AZURE_SQL_USERNAME="dbadmin" AZURE_SQL_PASSWORD="AzurePassword123!" AZURE_SQL_DRIVER="{ODBC Driver 17 for SQL Server}" SECRET_KEY="kutubxona-tizimi-maxfiy-kalit-2026" SCM_DO_BUILD_DURING_DEPLOYMENT=true
             az webapp config set --resource-group azurehamdambek --name logistics-app-karimov --startup-file "gunicorn --bind=0.0.0.0 --timeout 600 -w 4 -k uvicorn.workers.UvicornWorker main:app"
 
       - name: 'Deploy to Azure Web App'
