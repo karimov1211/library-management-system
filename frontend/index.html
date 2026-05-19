@@ -1122,26 +1122,24 @@ function App() {
                 </div>
               </div>
             </section>
-
-            <section className="glass-card git-log-card">
+            <section className="glass-card stat-dashboard-card" style={{ marginTop: '1.5rem' }}>
               <div className="card-header">
-                <span className="icon">📁</span>
-                <h2>GitHub Versiyalar Tarixi (Git Log)</h2>
-                <span className="git-branch">🌿 main</span>
+                <span className="icon">📊</span>
+                <h2>Kompaniya Faoliyati (Jonli Statistikasi)</h2>
+                <span className="badge">Hozirgi holat</span>
               </div>
-              <div className="git-log-container">
-                <div className="git-log-list">
-                  {commits.length === 0 ? (
-                    <div className="git-empty">Versiyalar tarixi yuklanmoqda...</div>
-                  ) : (
-                    commits.map((commit, idx) => (
-                      <div className="git-commit-item" key={`commit-${commit.hash}-${idx}`}>
-                        <span className="commit-hash">{commit.hash}</span>
-                        <span className="commit-date">{commit.date}</span>
-                        <span className="commit-msg" title={commit.subject}>{commit.subject}</span>
-                      </div>
-                    ))
-                  )}
+              <div className="stats-grid" style={{ gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                <div className="stat-item">
+                  <span className="stat-label">Yetkazilgan yuklar bugun</span>
+                  <span className="stat-value" style={{ color: '#4f46e5' }}>1,245 ta</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Yo'ldagi transportlar</span>
+                  <span className="stat-value" style={{ color: '#10b981' }}>48 ta</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">O'rtacha yetkazish vaqti</span>
+                  <span className="stat-value" style={{ color: '#8b5cf6' }}>2 soat 15 d</span>
                 </div>
               </div>
             </section>
