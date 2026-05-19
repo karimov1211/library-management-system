@@ -7,9 +7,17 @@ venv/
 env/
 .env
 
-# Flask
-instance/
-.webassets-cache
+# Node.js / React
+node_modules/
+dist/
+frontend/dist/
+frontend/node_modules/
+.npm
+.eslintcache
+
+# Project Local Storage & History
+history/
+*.log
 
 # IDEs
 .vscode/

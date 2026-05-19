@@ -1,10 +1,5 @@
 fastapi
-uvicorn
-gunicorn
+uvicorn[standard]
+numpy
 pyodbc
-jinja2
 python-dotenv
-starlette
-pydantic
-python-multipart
-itsdangerous
